@@ -1,0 +1,23 @@
+{
+  "id": null,
+  "name": "dima",
+  "username": "plugoh",
+  "email": "dima.abramiuk@gmail.com",
+  "phone": "063-865-2838",
+  "website": "google.com",
+  "address": {
+    "street": "Tereshkova",
+    "suite": "13",
+    "city": "Vinnytsya",
+    "zipcode": "21012",
+    "geo": {
+      "lat": "-2",
+      "lng": "13"
+    }
+  },
+  "company": {
+    "name": "Racoon",
+    "catchPhrase": "Why are you gay?",
+    "bs": "tralal"
+  }
+}
