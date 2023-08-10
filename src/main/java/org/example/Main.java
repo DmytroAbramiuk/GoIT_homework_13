@@ -1,83 +1,89 @@
 package org.example;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import org.example.human.Human;
-import org.jsoup.Jsoup;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonParser;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 
 import java.io.*;
-import java.lang.reflect.Type;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.URI;
 import java.nio.file.Files;
-import java.util.List;
+import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class Main {
 
-    private static final String apiUrl = "https://jsonplaceholder.typicode.com/users";
+    private static final String API_URL = "https://jsonplaceholder.typicode.com/users";
 
-    public static void getContent(){
-        try {
-            String json = Jsoup.connect(apiUrl)
-                    .ignoreContentType(true)
-                    .get()
-                    .body()
-                    .text();
-
-            Type type = TypeToken.getParameterized(List.class, Human.class)
-                    .getType();
-
-            List<Human> humanList = new Gson().fromJson(json, type);
-
-            System.out.println(humanList);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    public static String convertJsonToString(String path) throws IOException {
+        return new String(Files.readAllBytes(Paths.get("src/task.json")));
     }
 
-    private static void sendPOST() throws IOException {
-        File humanInfo = new File("src/task.json");
+    private static String getResponceBody(HttpResponse httpResponse) throws IOException {
+        return "Status code: "
+                + httpResponse.getStatusLine().getStatusCode()
+                + "\nResponce body: "
+                + EntityUtils.toString(httpResponse.getEntity());
+    }
 
-        URL url = new URL(apiUrl);
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestMethod("POST");
-        connection.setDoOutput(true);
-        OutputStream os = connection.getOutputStream();
-        os.write(Files.readAllBytes(humanInfo.toPath()));
+    public static void sendGet() throws IOException {
+        HttpClient httpClient = HttpClients.createDefault();
+        HttpGet httpGet = new HttpGet(API_URL);
 
-        //read json file with a new human
-        Scanner sc = new Scanner(humanInfo);
-        String human = "";
-        while(sc.hasNext())
-            human += sc.nextLine();
+        HttpResponse response = httpClient.execute(httpGet);
 
-        Gson json = new Gson();
-        System.out.println("json = " + json.toJson(human));
+        int statusCode = response.getStatusLine().getStatusCode();
 
-        sc.close();
-        os.flush();
-        os.close();
+        String responseBody = EntityUtils.toString(response.getEntity());
+        System.out.println("Status Code: " + statusCode + "\nResponce: " + responseBody);
+    }
 
-        int responseCode = connection.getResponseCode();
-        System.out.println("POST response code: " + responseCode);
-        if (responseCode == HttpURLConnection.HTTP_CREATED) {
-            BufferedReader in =
-                    new BufferedReader(
-                            new InputStreamReader(connection.getInputStream()));
-            StringBuffer response = new StringBuffer();
-            String inputLine;
-            while ((inputLine = in.readLine()) != null) {
-                response.append(inputLine);
-            }
-            in.close();
-            System.out.println(response.toString());
-        } else {
-            System.out.println("POST request not worked");
-        }
+    private static HttpResponse sendPost(String pathToAFile) throws IOException {
+        HttpClient httpClient = HttpClients.createDefault();
+        HttpPost httpPost = new HttpPost(API_URL);
+
+        String jsonHuman = convertJsonToString(pathToAFile);
+        System.out.println(jsonHuman);
+        System.out.println("==============================================================================");
+
+        httpPost.setEntity(new StringEntity(jsonHuman));
+        httpPost.setHeader("Content-Type", "application/json");
+
+        return httpClient.execute(httpPost);
+    }
+
+    public static HttpResponse sendPut(String pathToAFile) throws IOException {
+        HttpClient httpClient = HttpClients.createDefault();
+        HttpPut httpPut = new HttpPut(API_URL);
+
+        String jsonHuman = convertJsonToString(pathToAFile);
+        System.out.println(jsonHuman);
+        System.out.println("==============================================================================");
+
+        httpPut.setEntity(new StringEntity(jsonHuman));
+
+        httpPut.setHeader("Content-Type", "application/json");
+
+        return httpClient.execute(httpPut);
     }
 
     public static void main(String[] args) throws IOException {
-        sendPOST();
+        HttpResponse sendResponse = sendPost("src/task.json");
+        System.out.println("getResponceBody(response) = " + getResponceBody(sendResponse));
+
+        System.out.println("=====================================================================");
+        System.out.println("=====================================================================");
+        System.out.println("=====================================================================");
+
+        HttpResponse putResponce = sendPut("src/task.json");
+        System.out.println("getResponceBody(response) = " + getResponceBody(putResponce));
     }
 }
