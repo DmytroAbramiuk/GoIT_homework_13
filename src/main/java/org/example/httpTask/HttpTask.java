@@ -1,4 +1,4 @@
-package org.example.Task_1;
+package org.example.httpTask;
 
 import com.google.gson.*;
 import org.apache.http.HttpResponse;
@@ -10,15 +10,12 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.example.human.Human;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.List;
 
 public class HttpTask {
     private static final String API_URL = "https://jsonplaceholder.typicode.com/users";
